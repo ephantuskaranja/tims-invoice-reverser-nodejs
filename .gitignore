@@ -1,0 +1,12 @@
+.env
+relevantNumbers.xlsx
+processedNumbers.json
+node_modules/
+CorrectInvoiceResponses/
+CorrectInvoices/
+ItemResponses/
+CreditNoteRequests/
+CreditNoteResponses/
+
+processedCorrectInvoices.json
+processedCreditNotes.json
