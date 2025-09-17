@@ -123,7 +123,7 @@ async function fetchInvoiceItems() {
                     'Accept': 'application/json',
                 },
                 httpAgent: agent,
-                timeout: 120000 // 120 seconds
+                timeout: 60000 // 60 seconds
             });
             const data = response.data;
             if (data && data.messages && data.messages.toLowerCase() === 'success') {
