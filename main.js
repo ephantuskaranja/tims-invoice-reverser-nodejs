@@ -12,13 +12,31 @@ try { step4 = require('./step4_createCorrectInvoices'); } catch {}
 try { step5 = require('./step5_processCorrectInvoices'); } catch {}
 
 app.get('/', (req, res) => {
-    res.send('<h2>TIMS Invoice Reverser API</h2><ul>' +
-        '<li><a href="/run-step1">Run Step 1: Fetch Invoice Items</a></li>' +
-        '<li><a href="/run-step2">Run Step 2: Build Credit Note Requests</a></li>' +
-        '<li><a href="/run-step3">Run Step 3: Process Credit Notes</a></li>' +
-        '<li><a href="/run-step4">Run Step 4: Create Correct Invoices</a></li>' +
-        '<li><a href="/run-step5">Run Step 5: Process Correct Invoices</a></li>' +
-        '</ul>');
+    res.send(`
+        <h2>TIMS Invoice Reverser API - Endpoint Documentation</h2>
+        <ul>
+            <li><b>GET /run-step1</b> - Run Step 1: Fetch Invoice Items from devices using Excel file</li>
+            <li><b>GET /run-step2</b> - Run Step 2: Build Credit Note Requests from fetched items</li>
+            <li><b>GET /run-step3</b> - Run Step 3: Process Credit Notes (send to device, save responses)</li>
+            <li><b>GET /run-step4</b> - Run Step 4: Create Correct Invoices (generate new invoice data)</li>
+            <li><b>GET /run-step5</b> - Run Step 5: Process Correct Invoices (send to device, save responses)</li>
+        </ul>
+        <h3>Usage</h3>
+        <ul>
+            <li>Visit each endpoint in order to run the workflow step-by-step.</li>
+            <li>Each step must complete before running the next.</li>
+            <li>All configuration (devices, etc.) is managed in <code>config.js</code>.</li>
+            <li>Excel file <code>relevantNumbers.xlsx</code> must be present in the root directory.</li>
+        </ul>
+        <h3>Example</h3>
+        <pre>
+GET /run-step1
+GET /run-step2
+GET /run-step3
+GET /run-step4
+GET /run-step5
+        </pre>
+    `);
 });
 
 app.get('/run-step1', async (req, res) => {
@@ -72,4 +90,11 @@ app.get('/run-step5', async (req, res) => {
 
 app.listen(port, () => {
     console.log(`TIMS Invoice Reverser Express app listening at http://localhost:${port}`);
+    console.log('\nAvailable Endpoints:');
+    console.log('GET /run-step1 - Run Step 1: Fetch Invoice Items from devices using Excel file');
+    console.log('GET /run-step2 - Run Step 2: Build Credit Note Requests from fetched items');
+    console.log('GET /run-step3 - Run Step 3: Process Credit Notes (send to device, save responses)');
+    console.log('GET /run-step4 - Run Step 4: Create Correct Invoices (generate new invoice data)');
+    console.log('GET /run-step5 - Run Step 5: Process Correct Invoices (send to device, save responses)');
+    console.log('\nVisit http://localhost:' + port + ' in your browser for more info.');
 });
