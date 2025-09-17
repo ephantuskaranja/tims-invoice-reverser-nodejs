@@ -90,7 +90,7 @@ async function fetchInvoiceItems() {
         if (!deviceIP) {
             console.error(`No device IP found for device number: ${deviceNumber}`);
             fs.writeFileSync(
-                path.join(itemResponsesDir, `${invoiceNumber}.json`),
+                path.join(itemResponsesDir, `${invoiceNumber}_error.json`),
                 JSON.stringify({ error: 'Device IP not found for this device number' }, null, 2)
             );
             continue;
@@ -102,13 +102,12 @@ async function fetchInvoiceItems() {
         } catch (err) {
             console.error(`PIN verification failed for device ${deviceIP}:`, err.message);
             fs.writeFileSync(
-                path.join(itemResponsesDir, `${invoiceNumber}.json`),
+                path.join(itemResponsesDir, `${invoiceNumber}_error.json`),
                 JSON.stringify({ error: 'PIN verification failed: ' + err.message }, null, 2)
             );
             continue;
         }
         console.log(`PIN verification response for device ${deviceIP}:`, verifyPinResponse);
-
         if (verifyPinResponse !== '0100') {
             console.error(`Invalid pin verification for device ${deviceIP}`);
             fs.writeFileSync(
@@ -121,25 +120,30 @@ async function fetchInvoiceItems() {
             console.log(`Fetching invoice number: ${invoiceNumber} from device ${deviceIP}`);
             const response = await axios.get(`${deviceIP}transactions/${invoiceNumber}`, {
                 headers: {
-                    // 'Content-Type': 'application/json',
                     'Accept': 'application/json',
-                    // 'Connection': 'close'
                 },
                 httpAgent: agent,
                 timeout: 120000 // 120 seconds
             });
             const data = response.data;
-            fs.writeFileSync(
-                path.join(itemResponsesDir, `${invoiceNumber}.json`),
-                JSON.stringify(data, null, 2)
-            );
-            console.log(`Saved response for invoice ${invoiceNumber}`);
-            writeFetchedInvoiceNumberItem(invoiceNumber);
+            if (data && data.messages && data.messages.toLowerCase() === 'success') {
+                fs.writeFileSync(
+                    path.join(itemResponsesDir, `${invoiceNumber}.json`),
+                    JSON.stringify(data, null, 2)
+                );
+                console.log(`Saved SUCCESS response for invoice ${invoiceNumber}`);
+                writeFetchedInvoiceNumberItem(invoiceNumber);
+            } else {
+                fs.writeFileSync(
+                    path.join(itemResponsesDir, `${invoiceNumber}_error.json`),
+                    JSON.stringify(data, null, 2)
+                );
+                console.log(`Saved NON-SUCCESS response for invoice ${invoiceNumber}`);
+            }
         } catch (err) {
             console.error(`Error fetching invoice ${invoiceNumber}:`, err.response?.data || err.code || err.message, err.stack);
-
             fs.writeFileSync(
-                path.join(itemResponsesDir, `${invoiceNumber}.json`),
+                path.join(itemResponsesDir, `${invoiceNumber}_error.json`),
                 JSON.stringify({ error: err.message }, null, 2)
             );
         }
@@ -153,3 +157,4 @@ if (require.main === module) {
 }
 
 module.exports = { fetchInvoiceItems };
+// End of file
